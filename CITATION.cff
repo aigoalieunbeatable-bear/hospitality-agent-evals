@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this test set, please cite it as below."
+title: "Hospitality Agent Evals: The Aster Room"
+abstract: "Forty questions a guest asks a restaurant's AI about wine, a fictional venue and list, a price checker, and a scorer that separates what code can judge from what a sommelier must."
+authors:
+  - family-names: Wu
+    given-names: Woody
+    website: "https://woodywusommelier.com"
+version: 1.0.0
+date-released: 2026-10-04
+license: MIT
+url: "https://woodywusommelier.com/consulting/ai-teams/"
+keywords:
+  - evaluation
+  - hospitality
+  - restaurants
+  - wine
+  - AI agents
+  - sommelier

@@ -1,0 +1,14 @@
+{
+  "name": "hospitality-agent-evals",
+  "version": "1.0.0",
+  "description": "Forty questions a guest asks a restaurant's AI about wine, with a price checker and an honest scorer.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Woody Wu (https://woodywusommelier.com)",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "node --test test/*.test.mjs && node scripts/check-public.mjs",
+    "requests": "node bin/requests.mjs",
+    "score": "node bin/score.mjs"
+  }
+}
