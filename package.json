@@ -5,10 +5,13 @@
   "type": "module",
   "license": "MIT",
   "author": "Woody Wu (https://woodywusommelier.com)",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "test": "node --test test/*.test.mjs && node scripts/check-public.mjs",
     "requests": "node bin/requests.mjs",
-    "score": "node bin/score.mjs"
+    "score": "node bin/score.mjs",
+    "huggingface": "node scripts/build-huggingface.mjs"
   }
 }
