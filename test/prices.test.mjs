@@ -60,3 +60,17 @@ test("multi-thousand amounts match the private room minimums", () => {
   assert.deepEqual(wrong("The Vault minimum on a Friday is $4,000."), []);
   assert.deepEqual(wrong("The Vault minimum on a Friday is $3,500."), ["$3,500"]);
 });
+
+test("a price is never pinned to a wine named in an earlier sentence", () => {
+  // A real House Somm reply, 2026-10-04. Every price in it is right: the tasting
+  // menu is $165 and the pairings are 95 and 155. The checker once pinned all three
+  // to Clos Verrier, named a sentence earlier, and failed a correct answer.
+  const reply = "小农香槟可以说是我们的招牌，目前有Maison Perrot和Clos Verrier两款配额酒，都很值得一试。"
+    + "\n\n如果您想按杯点，价格从16加元到42加元不等。另外，如果您点7道菜的品鉴菜单($165/位)，我们也设计了专门的配酒方案，经典版95加元，珍藏版155加元。";
+  const { cited, errors } = validateCitedPrices(reply, venue);
+  assert.deepEqual(cited.map((c) => c.amount), [16, 42, 165, 95, 155], "Chinese prices followed by Chinese text are read");
+  assert.deepEqual(errors, []);
+  // Within a sentence, association still catches a wrong price.
+  assert.deepEqual(wrong("Clos Verrier两款配额酒，每杯28加元。"), ["28加元"]);
+  assert.deepEqual(wrong("The Clos Verrier is lovely. It is $28 a glass."), [], "across a sentence, a real list price passes");
+});

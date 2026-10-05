@@ -30,7 +30,9 @@ function isLimit(value, index, length) {
 export function extractCitedPrices(value) {
   const matches = [];
   const prefix = /(?:CA\$|CAD\s*|\$)\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)(?!\d|[.,]\d)/gi;
-  const suffix = /(\d+(?:,\d{3})*(?:\.\d{1,2})?)\s*(加元|美元|元)(?![\p{L}\p{N}])/gu;
+  // Only a Latin letter or digit after 元 makes it part of something else. Chinese
+  // runs straight on ("16加元到42加元"), and those are prices.
+  const suffix = /(\d+(?:,\d{3})*(?:\.\d{1,2})?)\s*(加元|美元|元)(?![A-Za-z0-9])/gu;
 
   for (const match of value.matchAll(prefix)) {
     if (isLimit(value, match.index, match[0].length)) continue;
@@ -47,6 +49,11 @@ export function extractCitedPrices(value) {
   }
   return matches.sort((a, b) => a.index - b.index);
 }
+
+// A full stop, question or exclamation mark followed by a space, a semicolon, a
+// Chinese full stop, or a line break. "No. 3" counts as a break; that only ever
+// stops an association, so it can miss an error but never invent one.
+const SENTENCE_BREAK = /[.!?;]\s|[。！？；\n]/;
 
 export function allItems(venue) {
   return [...venue.wineItems, ...venue.zeroProofItems, ...venue.otherPricedItems];
@@ -100,11 +107,16 @@ export function validateCitedPrices(value, venue) {
   const named = itemMentions(value, items);
   const errors = cited.filter((price) => {
     if (price.currency !== "CAD" || !knownPrices.has(price.amount)) return true;
-    // A price belongs to the last item named before it, unless another item is
-    // named between them.
+    // A price belongs to the last item named before it in the same sentence, unless
+    // another item is named between them. Across a sentence break the name and the
+    // price are about different things: "Clos Verrier is worth trying. The tasting
+    // menu is $165" does not price the Crémant at $165.
     const priorItem = named.filter((mention) => mention.end <= price.index).at(-1);
     const nextItem = named.find((mention) => mention.index > (priorItem?.index ?? -1));
-    const isAssociated = priorItem !== undefined && (nextItem === undefined || price.index < nextItem.index);
+    const isAssociated =
+      priorItem !== undefined &&
+      (nextItem === undefined || price.index < nextItem.index) &&
+      !SENTENCE_BREAK.test(value.slice(priorItem.end, price.index));
     return isAssociated && priorItem.item.price !== price.amount;
   });
   return { cited, errors };
